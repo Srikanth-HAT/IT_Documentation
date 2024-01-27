@@ -4,4 +4,14 @@ sudo bash ./wazuh-install.sh -a					See ->
 You can access the web interface https://<wazuh-dashboard-ip>:443											
 	    User: admin											
 	    Password: 											
-	04/11/2023 03:57:08 INFO: Installation finished.											
+	04/11/2023 03:57:08 INFO: Installation finished.	
+
+/var/ossec/bin/manage_agents									
+	nc -zv 192.168.64.17 443  								
+	Connection to 192.168.64.17 port 443 [tcp/https] succeeded!								
+	nc -zv 192.168.64.17 1514 								
+	Connection to 192.168.64.17 port 1514 [tcp/fujitsu-dtcns] succeeded!								
+	nc -zv 192.168.64.17 1515								
+	Connection to 192.168.64.17 port 1515 [tcp/ifor-protocol] succeeded!								
+	nc -zv 192.168.64.17 55000								
+	Connection to 192.168.64.17 port 55000 [tcp/*] succeeded!								
