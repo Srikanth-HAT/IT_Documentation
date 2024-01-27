@@ -1,0 +1,7 @@
+sudo apt install vim curl apt-transport-https unzip wget libcap2-bin software-properties-common lsb-release gnupg2											
+curl -sO https://packages.wazuh.com/4.6/wazuh-install.sh											
+sudo bash ./wazuh-install.sh -a					See ->						
+You can access the web interface https://<wazuh-dashboard-ip>:443											
+	    User: admin											
+	    Password: 											
+	04/11/2023 03:57:08 INFO: Installation finished.											
