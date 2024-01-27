@@ -14,4 +14,93 @@ You can access the web interface https://<wazuh-dashboard-ip>:443
 	nc -zv 192.168.64.17 1515								
 	Connection to 192.168.64.17 port 1515 [tcp/ifor-protocol] succeeded!								
 	nc -zv 192.168.64.17 55000								
-	Connection to 192.168.64.17 port 55000 [tcp/*] succeeded!								
+	Connection to 192.168.64.17 port 55000 [tcp/*] succeeded!		
+
+cd /var/ossec/etc								
+	( Only during installation)							
+openssl req -x509 -new -nodes -newkey rsa:4096 -keyout rootCAnew.key --days 3650 -out rootCAnew.pem -batch -subj "/C=US/ST=VA/O=HAT"								
+	( Only during installation)							
+openssl req -new -nodes -newkey rsa:4096 -keyout sslagentnew.key -out sslagentnew.csr -batch								
+	( Only during installation)							
+openssl x509 -req -days 3650 -in sslagentnew.csr -CA rootCAnew.pem -CAkey rootCAnew.key -out sslagentnew.cert -CAcreateserial								
+	( Only during installation)							
+vi /var/ossec/etc/ossec.conf								
+<ssl_agent_ca>/var/ossec/etc/rootCAnew.pem</ssl_agent_ca>								
+								
+systemctl restart wazuh-manager.service								
+								
+sudo rm -rf /tmp/wazuh_envs								agent
+								
+sudo /Library/Ossec/bin/wazuh-control stop								agent
+								
+sudo /bin/rm -r /Library/Ossec								
+								
+cp   " sslagentnew.key , sslagentnew.cert " to AGENT's /opt								
+								
+curl -so wazuh-agent.pkg https://packages.wazuh.com/4.x/macos/wazuh-agent-4.7.0-1.arm64.pkg && echo "WAZUH_MANAGER='52.207.25.98' && WAZUH_REGISTRATION_KEY='/opt/wazuh/sslagentnew.key' && WAZUH_REGISTRATION_CERTIFICATE='/opt/wazuh/sslagentnew.cert' && WAZUH_AGENT_GROUP='MAC' && WAZUH_AGENT_NAME='HAT-IN-LAP-039'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /								
+								
+sudo tail -f /Library/Ossec/logs/ossec.log								in new tab
+								
+sudo /Library/Ossec/bin/wazuh-control start								
+								
+ /var/ossec/bin/agent_control -l								server
+								
+Wazuh agent_control. List of available agents:								
+   ID: 000, Name: ubuntumaster (server), IP: 127.0.0.1, Active/Local								
+   ID: 001, Name: HAT-IN-LAP-044, IP: any, Active								
+								
+List of agentless devices:								
+								
+								
+wazuh smtp authentication:								
+								
+apt update								
+apt install postfix mailutils libsasl2-2 ca-certificates libsasl2-modules								
+vi /etc/postfix/main.cf								
+relayhost = smtp.office365.com:587								
+smtp_sasl_auth_enable = yes								
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd								
+smtp_sasl_security_options = noanonymous								
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt								
+smtp_use_tls = yes								
+smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, defer_unauth_destination								
+								
+echo smtp.office365.com:587 hat.support@hashagile.com:<Password> /etc/postfix/sasl_passwd								
+postmap /etc/postfix/sasl_passwd								
+chmod 400 /etc/postfix/sasl_passwd								
+chown root:root /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db								
+chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db								
+systemctl restart postfix								
+								
+echo "Test mail from postfix" | mail -s "Test Postfix" -r "hat@hashagile.com" hat@hashagile.com								
+								
+/var/ossec/etc/ossec.conf								
+<global>								
+  <email_notification>yes</email_notification>								
+  <smtp_server>loc</smtp_server>								
+  <email_from>hat.support@hashagile.com</email_from>								
+  <email_to>hat.support@hashagile.com</email_to>								
+</global>								
+								
+wazuh / management / configuration / edit configuration in to see changes in wazuh manager GUI								
+								
+<ossec_config>								
+  <global>								
+    <jsonout_output>yes</jsonout_output>								
+    <alerts_log>yes</alerts_log>								
+    <logall>no</logall>								
+    <logall_json>no</logall_json>								
+    <email_notification>yes</email_notification>								
+    <smtp_server>localhost</smtp_server>								
+    <email_from>hat.support@hashagile.com</email_from>								
+    <email_to>hat.support@hashagile.com</email_to>								
+    <email_maxperhour>20</email_maxperhour>								
+    <email_log_source>alerts.log</email_log_source>								
+    <agents_disconnection_time>10m</agents_disconnection_time>								
+    <agents_disconnection_alert_time>0</agents_disconnection_alert_time>								
+  </global>								
+								
+  <alerts>								
+    <log_alert_level>3</log_alert_level>								
+    <email_alert_level>12</email_alert_level>								
+  </alerts>								
